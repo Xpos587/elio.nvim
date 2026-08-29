@@ -52,7 +52,11 @@ end
 function M.quickfix_items(paths)
   local items = {}
   for _, path in ipairs(paths) do
-    items[#items + 1] = { filename = is_directory(path) and path .. "/" or path }
+    local filename = path
+    if is_directory(path) and path:sub(-1) ~= "/" then
+      filename = path .. "/"
+    end
+    items[#items + 1] = { filename = filename }
   end
   return items
 end

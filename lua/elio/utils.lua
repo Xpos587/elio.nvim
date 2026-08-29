@@ -23,7 +23,7 @@ end
 
 function M.cleanup_files(...)
   for _, path in ipairs({ ... }) do
-    if path and path ~= "" and vim.fn.filereadable(path) == 1 then
+    if path and path ~= "" then
       vim.fn.delete(path)
     end
   end
