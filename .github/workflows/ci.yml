@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    name: Neovim ${{ matrix.neovim }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        neovim: [v0.10.4, v0.11.5]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Neovim
+        uses: rhysd/action-setup-vim@v1
+        with:
+          version: ${{ matrix.neovim }}
+          neovim: true
+      - name: Set up Lua tools
+        run: |
+          cargo install stylua --version 0.20.0 --locked
+          sudo apt-get update
+          sudo apt-get install -y luarocks
+          luarocks install luacheck
+      - name: Check formatting
+        run: stylua --check lua plugin tests
+      - name: Check Lua
+        run: luacheck lua plugin tests --globals vim
+      - name: Check documentation
+        run: ./tests/check_docs.sh
+      - name: Run unit tests
+        run: nvim --headless -u tests/minimal_init.lua -l tests/run.lua
+      - name: Run smoke test
+        run: nvim --headless -u tests/minimal_init.lua -l tests/smoke.lua
+      - name: Check workflow syntax
+        run: docker run --rm -v "${{ github.workspace }}:/repo" -w /repo rhysd/actionlint:1.7.7
