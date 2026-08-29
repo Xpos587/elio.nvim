@@ -239,8 +239,7 @@ local function setup_directory_autocmd()
         if M.is_open() or not vim.api.nvim_buf_is_valid(buffer) then
           return
         end
-        M.open(name)
-        if vim.api.nvim_buf_is_valid(buffer) then
+        if M.open(name) and vim.api.nvim_buf_is_valid(buffer) then
           pcall(vim.api.nvim_buf_delete, buffer, { force = true })
         end
       end)

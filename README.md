@@ -1,6 +1,6 @@
 # elio.nvim
 
-Embed [Elio](https://github.com/Xpos587/elio) in a native Neovim floating terminal. Elio keeps ownership of its terminal UI, previews, mouse support, and file operations; this plugin handles launch, cleanup, and returned paths.
+Embed [Elio](https://github.com/elio-fm/elio) in a native Neovim floating terminal. Elio keeps ownership of its terminal UI, previews, mouse support, and file operations; this plugin handles launch, cleanup, and returned paths.
 
 ## Installation
 

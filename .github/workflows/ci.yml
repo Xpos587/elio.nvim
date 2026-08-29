@@ -24,7 +24,8 @@ jobs:
           cargo install stylua --version 0.20.0 --locked
           sudo apt-get update
           sudo apt-get install -y luarocks
-          luarocks install luacheck
+          luarocks install --local luacheck
+          echo "$HOME/.luarocks/bin" >> "$GITHUB_PATH"
       - name: Check formatting
         run: stylua --check lua plugin tests
       - name: Check Lua
