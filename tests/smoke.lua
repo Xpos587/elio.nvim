@@ -35,5 +35,30 @@ end, 20)
 assert(failed.code == 7, vim.inspect(failed))
 assert(vim.deep_equal(failed.selected_files, {}), vim.inspect(failed))
 assert(failed.cwd == nil, vim.inspect(failed))
+
+local elio = require("elio")
+elio.setup({
+  executable = root .. "/tests/fixtures/fake-elio",
+  env = { FAKE_ELIO_SELECTION = "/tmp/chosen.txt", FAKE_ELIO_CWD = "/tmp/project" },
+  keymaps = {
+    open_file_in_vertical_split = false,
+    open_file_in_horizontal_split = false,
+  },
+})
+assert(vim.fn.exists(":Elio") == 2)
+assert(vim.fn.exists(":ElioToggle") == 2)
+assert(vim.fn.exists(":ElioClose") == 2)
+local active = elio.open("/tmp/start.txt")
+assert(active, "public open did not return context")
+for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(active.buffer, "t")) do
+  assert(mapping.lhs ~= "<C-v>" and mapping.lhs ~= "<C-x>", vim.inspect(mapping))
+end
+vim.wait(2000, function()
+  return not elio.is_open()
+end, 20)
+assert(not elio.is_open(), "public process did not close")
+elio.setup({ executable = "__elio_missing__" })
+assert(elio.open("/tmp/start.txt") == nil)
+assert(not elio.is_open(), "missing executable opened window")
 print("process smoke test passed")
 vim.cmd("qa!")
