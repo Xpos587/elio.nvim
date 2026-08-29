@@ -19,35 +19,53 @@ end
 function M.open(opts)
   local width, height, row, col = dimensions(opts)
   local buffer = vim.api.nvim_create_buf(false, true)
-  local window = vim.api.nvim_open_win(buffer, true, {
-    relative = "editor",
-    style = "minimal",
-    width = width,
-    height = height,
-    row = row,
-    col = col,
-    border = opts.floating_window_border,
-  })
-  vim.bo[buffer].bufhidden = "wipe"
-  vim.bo[buffer].filetype = "elio"
-  vim.wo[window].winblend = opts.floating_window_winblend or 0
+  local window_id
+  local augroup
+  local ok, context = pcall(function()
+    window_id = vim.api.nvim_open_win(buffer, true, {
+      relative = "editor",
+      style = "minimal",
+      width = width,
+      height = height,
+      row = row,
+      col = col,
+      border = opts.floating_window_border,
+    })
+    vim.bo[buffer].bufhidden = "wipe"
+    vim.bo[buffer].filetype = "elio"
+    vim.wo[window_id].winblend = opts.floating_window_winblend or 0
 
-  local context = {
-    buffer = buffer,
-    window = window,
-    width = width,
-    height = height,
-    opts = opts,
-  }
-  context.augroup = vim.api.nvim_create_augroup("ElioWindow" .. buffer, { clear = true })
-  vim.api.nvim_create_autocmd("VimResized", {
-    group = context.augroup,
-    callback = function()
-      if vim.api.nvim_win_is_valid(window) then
-        M.resize(context)
-      end
-    end,
-  })
+    local result = {
+      buffer = buffer,
+      window = window_id,
+      width = width,
+      height = height,
+      opts = opts,
+    }
+    augroup = vim.api.nvim_create_augroup("ElioWindow" .. buffer, { clear = true })
+    result.augroup = augroup
+    vim.api.nvim_create_autocmd("VimResized", {
+      group = augroup,
+      callback = function()
+        if vim.api.nvim_win_is_valid(window_id) then
+          M.resize(result)
+        end
+      end,
+    })
+    return result
+  end)
+  if not ok then
+    if augroup then
+      pcall(vim.api.nvim_del_augroup_by_id, augroup)
+    end
+    if window_id and vim.api.nvim_win_is_valid(window_id) then
+      pcall(vim.api.nvim_win_close, window_id, true)
+    end
+    if vim.api.nvim_buf_is_valid(buffer) then
+      pcall(vim.api.nvim_buf_delete, buffer, { force = true })
+    end
+    error(context)
+  end
   return context
 end
 

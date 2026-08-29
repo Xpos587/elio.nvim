@@ -34,6 +34,10 @@ local function cleanup(context)
   end
   context.cleaned = true
   utils.cleanup_files(context.chooser_file, context.cwd_file)
+  if context.terminal_channel then
+    pcall(vim.fn.chanclose, context.terminal_channel)
+    context.terminal_channel = nil
+  end
   window.close(context.window_context)
 end
 
@@ -56,9 +60,29 @@ function M.start(opts, path, callbacks)
   context.window = window_context.window
   context.buffer = window_context.buffer
 
+  local terminal_ok, terminal_channel = pcall(vim.api.nvim_open_term, context.buffer, {
+    on_input = function(_, _, _, data)
+      if context.job_id and not context.cleaned then
+        pcall(vim.api.nvim_chan_send, context.job_id, data)
+      end
+    end,
+  })
+  if not terminal_ok or type(terminal_channel) ~= "number" or terminal_channel <= 0 then
+    cleanup(context)
+    notify("could not open Elio terminal")
+    dispatch(callbacks, { code = -1, selected_files = {}, cwd = nil })
+    return nil
+  end
+  context.terminal_channel = terminal_channel
+
   local argv = command.build(opts, path, context.chooser_file, context.cwd_file)
   local job_opts = {
-    term = true,
+    pty = true,
+    on_stdout = function(_, data)
+      if context.terminal_channel and #data > 0 then
+        pcall(vim.api.nvim_chan_send, context.terminal_channel, table.concat(data, "\n"))
+      end
+    end,
     on_exit = function(_, code)
       if context.cleaned then
         return
@@ -95,6 +119,9 @@ function M.start(opts, path, callbacks)
 
   context.job_id = job_id
   window_context.job_id = job_id
+  if vim.fn.jobresize then
+    pcall(vim.fn.jobresize, job_id, window_context.width, window_context.height)
+  end
   return context
 end
 

@@ -50,6 +50,7 @@ assert(vim.fn.exists(":ElioToggle") == 2)
 assert(vim.fn.exists(":ElioClose") == 2)
 local active = elio.open("/tmp/start.txt")
 assert(active, "public open did not return context")
+assert(active.terminal_channel, "Elio output is not attached to a virtual terminal")
 for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(active.buffer, "t")) do
   assert(mapping.lhs ~= "<C-v>" and mapping.lhs ~= "<C-x>", vim.inspect(mapping))
 end
@@ -57,6 +58,15 @@ vim.wait(2000, function()
   return not elio.is_open()
 end, 20)
 assert(not elio.is_open(), "public process did not close")
+
+elio.setup({
+  executable = root .. "/tests/fixtures/fake-elio",
+  env = { FAKE_ELIO_SELECTION = "", FAKE_ELIO_CWD = "/tmp/project" },
+})
+vim.cmd([[Elio /tmp/path\ with\ spaces.txt]])
+assert(elio.active and elio.active.input_path == "/tmp/path with spaces.txt", "command path was not unescaped")
+vim.wait(100)
+
 elio.setup({ executable = "__elio_missing__" })
 assert(elio.open("/tmp/start.txt") == nil)
 assert(not elio.is_open(), "missing executable opened window")

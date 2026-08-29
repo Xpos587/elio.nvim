@@ -187,15 +187,18 @@ local function dispatch_result(context, result)
 end
 
 local function setup_commands()
+  local function command_path(command)
+    return command.fargs[1] and vim.fn.expandcmd(command.fargs[1]) or nil
+  end
   local commands = { "Elio", "ElioToggle", "ElioClose" }
   for _, name in ipairs(commands) do
     pcall(vim.api.nvim_del_user_command, name)
   end
   vim.api.nvim_create_user_command("Elio", function(command)
-    M.open(command.args ~= "" and command.args or nil)
+    M.open(command_path(command))
   end, { nargs = "?", complete = "file_in_path" })
   vim.api.nvim_create_user_command("ElioToggle", function(command)
-    M.toggle(command.args ~= "" and command.args or nil)
+    M.toggle(command_path(command))
   end, { nargs = "?", complete = "file_in_path" })
   vim.api.nvim_create_user_command("ElioClose", function()
     M.close()
@@ -296,6 +299,12 @@ function M.open(path)
   M.last_path = input_path
   vim.b[context.buffer].elio_terminal = true
   setup_terminal_keymaps(context)
+  vim.schedule(function()
+    if M.active == context and vim.api.nvim_win_is_valid(context.window) then
+      vim.api.nvim_set_current_win(context.window)
+      vim.cmd("startinsert")
+    end
+  end)
   return context
 end
 
