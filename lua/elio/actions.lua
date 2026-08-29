@@ -75,8 +75,18 @@ function M.copy_relative(paths, register, base_dir)
       value = vim.fs.relpath(base_dir, path)
     end
     if not value then
-      local prefix = base_dir:gsub("/+$", "") .. "/"
-      value = path:sub(1, #prefix) == prefix and path:sub(#prefix + 1) or vim.fn.fnamemodify(path, ":.")
+      local normalized_base = base_dir:gsub("/+$", "")
+      if normalized_base == "" then
+        normalized_base = "/"
+      end
+      local prefix = normalized_base == "/" and "/" or normalized_base .. "/"
+      if path == normalized_base then
+        value = "."
+      elseif path:sub(1, #prefix) == prefix then
+        value = path:sub(#prefix + 1)
+      else
+        value = path
+      end
     end
     relative[#relative + 1] = value
   end

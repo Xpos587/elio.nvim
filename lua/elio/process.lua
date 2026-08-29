@@ -63,6 +63,10 @@ function M.start(opts, path, callbacks)
       if context.cleaned then
         return
       end
+      if context.stopped then
+        cleanup(context)
+        return
+      end
       local selected_files = {}
       local cwd
       if code == 0 then
@@ -123,8 +127,9 @@ function M.stop(context)
   context.stopped = true
   if context.job_id and M.is_running(context) then
     pcall(vim.fn.jobstop, context.job_id)
-    if vim.fn.jobwait then
-      pcall(vim.fn.jobwait, { context.job_id }, 100)
+    pcall(vim.fn.jobwait, { context.job_id }, 100)
+    if M.is_running(context) then
+      return
     end
   end
   cleanup(context)

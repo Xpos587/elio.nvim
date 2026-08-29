@@ -3,4 +3,7 @@ if vim.g.loaded_elio then
 end
 vim.g.loaded_elio = true
 
-require("elio").setup()
+local elio = require("elio")
+if elio.config == nil then
+  elio.setup()
+end

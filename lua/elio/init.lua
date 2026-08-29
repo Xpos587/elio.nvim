@@ -34,7 +34,7 @@ local function resolve_path(path)
   if path == nil or path == "" then
     path = current_path()
   end
-  return utils.normalize_path(vim.fn.expand(path))
+  return utils.normalize_path(path)
 end
 
 local function close_help()
@@ -192,10 +192,10 @@ local function setup_commands()
     pcall(vim.api.nvim_del_user_command, name)
   end
   vim.api.nvim_create_user_command("Elio", function(command)
-    M.open(command.args ~= "" and vim.fn.expand(command.args) or nil)
+    M.open(command.args ~= "" and command.args or nil)
   end, { nargs = "?", complete = "file" })
   vim.api.nvim_create_user_command("ElioToggle", function(command)
-    M.toggle(command.args ~= "" and vim.fn.expand(command.args) or nil)
+    M.toggle(command.args ~= "" and command.args or nil)
   end, { nargs = "?", complete = "file" })
   vim.api.nvim_create_user_command("ElioClose", function()
     M.close()

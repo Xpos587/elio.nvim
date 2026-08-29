@@ -18,6 +18,8 @@ return {
     opts = {
       change_neovim_cwd_on_close = true,
     },
+    cmd = { "Elio", "ElioToggle", "ElioClose" },
+    event = "BufEnter",
     keys = {
       { "<leader>e", function() require("elio").toggle() end, desc = "Elio" },
     },
@@ -55,7 +57,7 @@ require("elio").setup({ executable = "/opt/elio/bin/elio" })
 
 ## Keymaps
 
-Mappings are terminal-local and can be disabled individually with `false`:
+Plugin mappings are terminal-local and can be disabled individually with `false`. Enter and `<Esc>` are Elio-native controls:
 
 | Mapping | Action |
 | --- | --- |
@@ -69,7 +71,7 @@ Mappings are terminal-local and can be disabled individually with `false`:
 | `<F1>` | Show help overlay |
 | `<Esc>` | Elio cancel behavior |
 
-Override mappings with `keymaps = { open_file_in_tab = "<leader>t" }`. Set any listed key to `false` to disable it.
+Override plugin mappings with `keymaps = { open_file_in_tab = "<leader>t" }`. Set any configurable plugin mapping to `false` to disable it.
 
 ## API
 
@@ -106,7 +108,7 @@ Confirm Elio can write its chooser file and that its version supports `--chooser
 
 **Working directory does not change**
 
-Use the `<C-\>` mapping or set `change_neovim_cwd_on_close = true`. The returned directory must exist when Elio exits.
+Use the `<C-\>` mapping for an explicit cwd change. `change_neovim_cwd_on_close = true` changes Neovim's cwd only when Elio exits without a selection. The returned directory must exist when Elio exits.
 
 **Files changed outside Neovim are stale**
 
