@@ -52,9 +52,12 @@ assert(vim.fn.getreg("z") == root .. "/tests/run.lua")
 vim.cmd.cd(previous_cwd)
 vim.fn.delete(copied, "rf")
 local before_buffers = #vim.api.nvim_list_bufs()
-local opened, _ = pcall(require("elio.window").open, vim.tbl_extend("force", config.defaults(), {
-  floating_window_border = "bogus",
-}))
+local opened, _ = pcall(
+  require("elio.window").open,
+  vim.tbl_extend("force", config.defaults(), {
+    floating_window_border = "bogus",
+  })
+)
 assert(not opened, "invalid window configuration unexpectedly succeeded")
 assert(#vim.api.nvim_list_bufs() == before_buffers, "failed window creation leaked scratch buffer")
 local window = require("elio.window").open(config.defaults())
