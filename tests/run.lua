@@ -10,11 +10,7 @@ local actions = require("elio.actions")
 local function assert_equal(actual, expected, message)
   assert(
     vim.deep_equal(actual, expected),
-    (message or "values differ")
-      .. "\nactual: "
-      .. vim.inspect(actual)
-      .. "\nexpected: "
-      .. vim.inspect(expected)
+    (message or "values differ") .. "\nactual: " .. vim.inspect(actual) .. "\nexpected: " .. vim.inspect(expected)
   )
 end
 
@@ -38,7 +34,7 @@ assert_equal(results.read_chooser(vim.fn.tempname()), {}, "missing chooser file 
 assert_equal(utils.normalize_path("/tmp/one file.txt"), "/tmp/one file.txt", "absolute path stays absolute")
 assert_equal(utils.read_lines(vim.fn.tempname()), {}, "missing lines file is empty")
 assert(actions.describe_single("/tmp/a b.txt") == "edit /tmp/a\\ b.txt")
-assert(actions.describe_single('/tmp/a"b.txt') == "edit /tmp/a\\\"b.txt")
+assert(actions.describe_single('/tmp/a"b.txt') == 'edit /tmp/a\\"b.txt')
 local folder = vim.fn.tempname()
 vim.fn.mkdir(folder, "p")
 local quickfix = actions.quickfix_items({ "/tmp/a.txt", folder })
