@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eu
+chooser=""
+cwd=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --chooser-file) chooser=$2; shift 2 ;;
+    --cwd-file) cwd=$2; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '%s\n' "$FAKE_ELIO_SELECTION" > "$chooser"
+printf '%s' "$FAKE_ELIO_CWD" > "$cwd"
+exit "${FAKE_ELIO_EXIT:-0}"
