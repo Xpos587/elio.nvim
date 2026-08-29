@@ -73,6 +73,23 @@ assert(not elio.is_open(), "missing executable opened window")
 
 local directory = vim.fn.tempname()
 vim.fn.mkdir(directory, "p")
+local selection_marker = vim.fn.tempname()
+elio.setup({
+  executable = root .. "/tests/fixtures/fake-elio",
+  env = {
+    FAKE_ELIO_SELECTION = directory,
+    FAKE_ELIO_SELECTION_ONCE = selection_marker,
+    FAKE_ELIO_CWD = "",
+  },
+})
+elio.open("/tmp")
+vim.wait(2000, function()
+  return not elio.is_open()
+end, 20)
+assert(elio.last_path == directory, "directory selection did not reopen Elio")
+vim.fn.delete(selection_marker)
+vim.fn.delete(directory, "d")
+
 local directory_buffer = vim.api.nvim_create_buf(true, false)
 vim.api.nvim_buf_set_name(directory_buffer, directory)
 vim.api.nvim_set_current_buf(directory_buffer)

@@ -150,7 +150,9 @@ local function dispatch_result(context, result)
   if action == "cwd" then
     apply_cwd(result.cwd)
   elseif #paths == 1 then
-    if action == "vertical" then
+    if not action and vim.fn.isdirectory(paths[1]) == 1 then
+      M.open(paths[1])
+    elseif action == "vertical" then
       actions.open_vertical(paths)
     elseif action == "horizontal" then
       actions.open_horizontal(paths)
