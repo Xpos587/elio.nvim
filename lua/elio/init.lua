@@ -133,9 +133,10 @@ local function apply_cwd(cwd)
 end
 
 local function dispatch_result(context, result)
-  if M.active == context then
-    M.active = nil
+  if M.active ~= context then
+    return
   end
+  M.active = nil
   restore_window(context)
   M.last_path = result.cwd or context.input_path or M.last_path
 

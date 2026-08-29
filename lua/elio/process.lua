@@ -123,6 +123,9 @@ function M.stop(context)
   context.stopped = true
   if context.job_id and M.is_running(context) then
     pcall(vim.fn.jobstop, context.job_id)
+    if vim.fn.jobwait then
+      pcall(vim.fn.jobwait, { context.job_id }, 100)
+    end
   end
   cleanup(context)
 end
